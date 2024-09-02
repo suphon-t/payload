@@ -1,3 +1,5 @@
+import { GraphQLClient } from 'graphql-request'
+
 import payload from '../../packages/payload/src'
 import { devUser } from '../credentials'
 import { initPayloadTest } from '../helpers/configHelpers'
@@ -7,6 +9,8 @@ require('isomorphic-fetch')
 
 let apiUrl
 let jwt
+let graphQLClient: GraphQLClient
+let postId: string
 
 const headers = {
   'Content-Type': 'application/json',
@@ -31,6 +35,19 @@ describe('_Community Tests', () => {
 
     const data = await response.json()
     jwt = data.token
+
+    const graphQLURL = `${apiUrl}/graphql`
+    graphQLClient = new GraphQLClient(graphQLURL)
+
+    const posts = await payload.find({
+      collection: postsSlug,
+      where: {
+        title: {
+          equals: 'title1',
+        },
+      },
+    })
+    postId = posts.docs[0].id as string
   })
 
   afterAll(async () => {
@@ -44,29 +61,53 @@ describe('_Community Tests', () => {
   // use the tests below as a guide
   // --__--__--__--__--__--__--__--__--__
 
-  it('local API example', async () => {
-    const newPost = await payload.create({
-      collection: postsSlug,
-      data: {
-        text: 'LOCAL API EXAMPLE',
+  it('rest API example', async () => {
+    const post = await fetch(`${apiUrl}/${postsSlug}/${postId}`, {
+      headers: {
+        ...headers,
+        Authorization: `JWT ${jwt}`,
       },
-    })
+    }).then((res) => res.json())
 
-    expect(newPost.text).toEqual('LOCAL API EXAMPLE')
+    const block = post.content.root.children[0].fields
+    expect(block).toMatchObject(
+      expect.objectContaining({
+        media: expect.objectContaining({
+          id: expect.any(String),
+          filename: expect.any(String),
+        }),
+      }),
+    )
   })
 
-  it('rest API example', async () => {
-    const newPost = await fetch(`${apiUrl}/${postsSlug}`, {
+  it('graphql API example', async () => {
+    const result = await fetch(`${apiUrl}/graphql`, {
       method: 'POST',
       headers: {
         ...headers,
         Authorization: `JWT ${jwt}`,
       },
       body: JSON.stringify({
-        text: 'REST API EXAMPLE',
+        query: `
+          {
+            Posts {
+              docs {
+                content
+              }
+            }
+          }
+        `,
       }),
     }).then((res) => res.json())
-
-    expect(newPost.doc.text).toEqual('REST API EXAMPLE')
+    const post = result.data.Posts.docs[0]
+    const block = post.content.root.children[0].fields
+    expect(block).toMatchObject(
+      expect.objectContaining({
+        media: expect.objectContaining({
+          id: expect.any(String),
+          filename: expect.any(String),
+        }),
+      }),
+    )
   })
 })
