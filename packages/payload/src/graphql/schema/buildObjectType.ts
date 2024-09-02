@@ -479,6 +479,7 @@ function buildObjectType({
             const populateDepth =
               field?.maxDepth !== undefined && field?.maxDepth < depth ? field?.maxDepth : depth
 
+            const populationPromises = []
             await editor?.populationPromise({
               context,
               depth: populateDepth,
@@ -487,11 +488,12 @@ function buildObjectType({
               findMany: false,
               flattenLocales: false,
               overrideAccess: false,
-              populationPromises: [],
+              populationPromises,
               req: context.req,
               showHiddenFields: false,
               siblingDoc: parent,
             })
+            await Promise.all(populationPromises)
           }
 
           return parent[field.name]
