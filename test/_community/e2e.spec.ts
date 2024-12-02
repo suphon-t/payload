@@ -28,10 +28,44 @@ test.describe('Admin Panel', () => {
     await ensureCompilationIsDone({ page, serverURL })
   })
 
-  test('example test', async () => {
+  test('document status should not be published after publishing an invalid draft', async () => {
     await page.goto(url.list)
 
-    const textCell = page.locator('.row-1 .cell-title')
-    await expect(textCell).toHaveText('example post')
+    // create a new post and save draft
+    await page.getByLabel('Create new Post').click()
+    await page.getByRole('button', { name: 'Save Draft' }).click()
+
+    // wait for the draft to be created
+    const status = page.getByTitle('Status: ')
+    await status.waitFor()
+    await expect(status).toHaveText(/Draft/)
+
+    // don't fill the title field and click publish
+    await page.getByRole('button', { name: 'Publish changes' }).click()
+    // the title field is required, so wait for the validation to fail
+    await page.getByText('This field is required.').waitFor()
+
+    // because the validation has failed, the post should stay in draft state
+    await expect(status).not.toHaveText(/Published/)
+  })
+
+  test('document status should change to draft after being unpublished', async () => {
+    await page.goto(url.list)
+
+    // create a new post and publish it
+    await page.getByLabel('Create new Post').click()
+    await page.getByLabel('Title*').fill('my new post')
+    await page.getByRole('button', { name: 'Publish changes' }).click()
+
+    // wait for the post to be published
+    const status = page.getByTitle('Status: ')
+    await status.waitFor()
+    await expect(status).toHaveText(/Published/)
+
+    // click unpublish
+    await page.getByRole('button', { name: 'Unpublish' }).click()
+    await page.getByRole('button', { name: 'Confirm' }).click()
+    // the status should change to draft
+    await expect(status).toHaveText(/Draft/)
   })
 })
