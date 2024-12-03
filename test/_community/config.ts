@@ -37,6 +37,7 @@ export default buildConfigWithDefaults({
       collection: postsSlug,
       data: {
         title: 'example post',
+        slug: 'example-post',
       },
     })
   },

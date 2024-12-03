@@ -12,6 +12,13 @@ export const PostsCollection: CollectionConfig = {
       name: 'title',
       type: 'text',
     },
+    {
+      name: 'slug',
+      type: 'text',
+      hooks: {
+        beforeChange: [({ data }) => (data.title ? data.title.replace(/\s/g, '-') : null)],
+      },
+    },
   ],
   versions: {
     drafts: true,
