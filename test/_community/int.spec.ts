@@ -48,30 +48,52 @@ describe('_Community Tests', () => {
   // use the tests below as a guide
   // --__--__--__--__--__--__--__--__--__
 
-  it('local API example', async () => {
-    const newPost = await payload.create({
+  it('deleting relation causes GraphQL error on later get', async () => {
+    const post1 = await payload.create({
       collection: postsSlug,
       data: {
-        title: 'LOCAL API EXAMPLE',
+        title: 'Post 1',
       },
       context: {},
     })
+    await payload.updateGlobal({
+      slug: 'home',
+      data: {
+        topPosts: [
+          {
+            post: post1.id,
+            caption: 'The best post out there',
+          },
+        ],
+      },
+      depth: 1,
+    })
 
-    expect(newPost.title).toEqual('LOCAL API EXAMPLE')
-  })
-
-  it('rest API example', async () => {
-    const data = await restClient
-      .POST(`/${postsSlug}`, {
-        body: JSON.stringify({
-          title: 'REST API EXAMPLE',
-        }),
-        headers: {
-          Authorization: `JWT ${token}`,
-        },
-      })
+    const query = `query {
+      Home {
+        topPosts {
+          post {
+            title
+          }
+        }
+      }
+    }`
+    const beforeDelete = await restClient
+      .GRAPHQL_POST({ body: JSON.stringify({ query }) })
       .then((res) => res.json())
+    expect(beforeDelete.errors).toBeUndefined()
+    expect(beforeDelete.data.Home.topPosts).toEqual([
+      expect.objectContaining({ post: { title: 'Post 1' } }),
+    ])
 
-    expect(data.doc.title).toEqual('REST API EXAMPLE')
+    await payload.delete({
+      collection: postsSlug,
+      id: post1.id,
+    })
+
+    const afterDelete = await restClient
+      .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+      .then((res) => res.json())
+    expect(afterDelete.errors).toBeUndefined()
   })
 })

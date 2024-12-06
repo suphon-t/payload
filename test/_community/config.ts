@@ -7,6 +7,7 @@ import { devUser } from '../credentials.js'
 import { MediaCollection } from './collections/Media/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
 import { MenuGlobal } from './globals/Menu/index.js'
+import { HomeGlobal } from './globals/Home/index.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -23,6 +24,7 @@ export default buildConfigWithDefaults({
   globals: [
     // ...add more globals here
     MenuGlobal,
+    HomeGlobal,
   ],
   onInit: async (payload) => {
     await payload.create({

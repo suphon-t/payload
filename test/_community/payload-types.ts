@@ -32,9 +32,11 @@ export interface Config {
   };
   globals: {
     menu: Menu;
+    home: Home;
   };
   globalsSelect: {
     menu: MenuSelect<false> | MenuSelect<true>;
+    home: HomeSelect<false> | HomeSelect<true>;
   };
   locale: null;
   user: User & {
@@ -316,10 +318,42 @@ export interface Menu {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home".
+ */
+export interface Home {
+  id: string;
+  topPosts: {
+    post: string | Post;
+    caption: string;
+    id?: string | null;
+  }[];
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "menu_select".
  */
 export interface MenuSelect<T extends boolean = true> {
   globalText?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home_select".
+ */
+export interface HomeSelect<T extends boolean = true> {
+  topPosts?:
+    | T
+    | {
+        post?: T;
+        caption?: T;
+        id?: T;
+      };
+  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
