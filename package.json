@@ -15,15 +15,15 @@
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
   },
   "dependencies": {
-    "@payloadcms/db-sqlite": "3.15.1",
-    "@payloadcms/next": "3.15.1",
-    "@payloadcms/payload-cloud": "3.15.1",
-    "@payloadcms/plugin-search": "3.15.1",
-    "@payloadcms/richtext-lexical": "3.15.1",
+    "@payloadcms/db-sqlite": "3.20.0",
+    "@payloadcms/next": "3.20.0",
+    "@payloadcms/payload-cloud": "3.20.0",
+    "@payloadcms/plugin-search": "3.20.0",
+    "@payloadcms/richtext-lexical": "3.20.0",
     "cross-env": "^7.0.3",
     "graphql": "^16.8.1",
     "next": "15.1.0",
-    "payload": "3.15.1",
+    "payload": "3.20.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "sharp": "0.32.6"
